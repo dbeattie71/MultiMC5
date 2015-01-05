@@ -40,10 +40,11 @@ public:
 	virtual QString dialogTitle();
 
 	//////  Mod Lists  //////
-	std::shared_ptr<ModList> jarModList();
-	std::shared_ptr<ModList> coreModList();
-	std::shared_ptr<ModList> loaderModList();
-	std::shared_ptr<ModList> texturePackList();
+	std::shared_ptr<ModList> jarModList() const ;
+	virtual QList< Mod > getJarMods() const override;
+	std::shared_ptr<ModList> coreModList() const;
+	std::shared_ptr<ModList> loaderModList() const;
+	std::shared_ptr<ModList> texturePackList() const override;
 
 	////// Directories //////
 	QString libDir() const;
@@ -96,7 +97,7 @@ public:
 	virtual bool setIntendedVersionId(QString version) override;
 	// the `version' of Legacy instances is defined by the launcher code.
 	// in contrast with OneSix, where `version' is described in a json file
-	virtual bool versionIsCustom() override
+	virtual bool profileIsCustom() override
 	{
 		return false;
 	}
@@ -116,10 +117,10 @@ public:
 	virtual QString getStatusbarDescription() override;
 
 protected:
-	std::shared_ptr<ModList> jar_mod_list;
-	std::shared_ptr<ModList> core_mod_list;
-	std::shared_ptr<ModList> loader_mod_list;
-	std::shared_ptr<ModList> texture_pack_list;
+	mutable std::shared_ptr<ModList> jar_mod_list;
+	mutable std::shared_ptr<ModList> core_mod_list;
+	mutable std::shared_ptr<ModList> loader_mod_list;
+	mutable std::shared_ptr<ModList> texture_pack_list;
 
 protected
 slots:

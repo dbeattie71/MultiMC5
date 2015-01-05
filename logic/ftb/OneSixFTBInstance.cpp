@@ -1,6 +1,6 @@
 #include "OneSixFTBInstance.h"
 
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixLibrary.h"
 #include "logic/minecraft/VersionBuilder.h"
 #include "logic/tasks/SequentialTask.h"

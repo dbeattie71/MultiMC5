@@ -20,7 +20,7 @@
 #include <QString>
 #include <memory>
 
-class InstanceVersion;
+class MinecraftProfile;
 class ForgeInstallTask;
 struct ForgeVersion;
 
@@ -40,7 +40,7 @@ protected:
 
 private:
 	// the parsed version json, read from the installer
-	std::shared_ptr<InstanceVersion> m_forge_json;
+	std::shared_ptr<MinecraftProfile> m_forge_json;
 	// the actual forge version
 	std::shared_ptr<ForgeVersion> m_forge_version;
 	QString internalPath;

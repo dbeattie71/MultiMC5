@@ -80,7 +80,7 @@ bool CoreModFolderPage::shouldDisplay() const
 		auto inst = dynamic_cast<OneSixInstance *>(m_inst);
 		if (!inst)
 			return true;
-		auto version = inst->getFullVersion();
+		auto version = inst->getMinecraftProfile();
 		if (!version)
 			return true;
 		if (version->m_releaseTime < g_VersionFilterData.legacyCutoffDate)

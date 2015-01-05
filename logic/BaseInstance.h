@@ -24,6 +24,7 @@
 #include "logic/settings/INIFile.h"
 #include "logic/BaseVersionList.h"
 #include "logic/auth/MojangAccount.h"
+#include "Mod.h"
 
 class ModList;
 class QDialog;
@@ -31,7 +32,6 @@ class QDir;
 class Task;
 class MinecraftProcess;
 class OneSixUpdate;
-class InstanceList;
 class BaseInstancePrivate;
 
 // pointer for lazy people
@@ -46,7 +46,7 @@ typedef std::shared_ptr<BaseInstance> InstancePtr;
  * To create a new instance type, create a new class inheriting from this class
  * and implement the pure virtual functions.
  */
-class BaseInstance : public QObject
+class BaseInstance : public QObject, public std::enable_shared_from_this<BaseInstance>
 {
 	Q_OBJECT
 protected:
@@ -57,7 +57,6 @@ public:
 	/// virtual destructor to make sure the destruction is COMPLETE
 	virtual ~BaseInstance() {};
 
-	virtual void init() {}
 	virtual void copy(const QDir &newDir) {}
 
 	/// nuke thoroughly - deletes the instance contents, notifies the list/model which is
@@ -101,7 +100,7 @@ public:
 	virtual QString intendedVersionId() const = 0;
 	virtual bool setIntendedVersionId(QString version) = 0;
 
-	virtual bool versionIsCustom() = 0;
+	virtual bool profileIsCustom() = 0;
 
 	/*!
 	 * The instance's current version.
@@ -118,13 +117,19 @@ public:
 	virtual void setShouldUpdate(bool val) = 0;
 
 	//////  Mod Lists  //////
-	virtual std::shared_ptr<ModList> resourcePackList()
+	virtual std::shared_ptr<ModList> resourcePackList() const
 	{
 		return nullptr;
 	}
-	virtual std::shared_ptr<ModList> texturePackList()
+	virtual std::shared_ptr<ModList> texturePackList() const
 	{
 		return nullptr;
+	}
+
+	/// get all jar mods applicable to this instance's jar. FIXME: nuke.
+	virtual QList<Mod> getJarMods() const
+	{
+		return QList<Mod>();
 	}
 
 	/// Traits. Normally inside the version, depends on instance implementation.
@@ -137,14 +142,6 @@ public:
 	qint64 lastLaunch() const;
 	/// Sets the last launched time to 'val' milliseconds since epoch
 	void setLastLaunch(qint64 val = QDateTime::currentMSecsSinceEpoch());
-
-	/*!
-	 * \brief Gets the instance list that this instance is a part of.
-	 *        Returns NULL if this instance is not in a list
-	 *        (the parent is not an InstanceList).
-	 * \return A pointer to the InstanceList containing this instance.
-	 */
-	InstanceList *instList() const;
 
 	InstancePtr getSharedPtr();
 

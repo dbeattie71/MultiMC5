@@ -1,5 +1,5 @@
 #include "MinecraftVersion.h"
-#include "InstanceVersion.h"
+#include "MinecraftProfile.h"
 #include "VersionBuildError.h"
 #include "VersionBuilder.h"
 #include "MultiMC.h"
@@ -56,15 +56,15 @@ bool MinecraftVersion::isMinecraftVersion()
 
 // 1. assume the local file is good. load, check. If it's good, apply.
 // 2. if discrepancies are found, fall out and fail (impossible to apply incomplete version).
-void MinecraftVersion::applyFileTo(InstanceVersion *version)
+void MinecraftVersion::applyFileTo(MinecraftProfile *version)
 {
 	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_descriptor));
-	
+
 	auto versionObj = VersionBuilder::parseBinaryJsonFile(versionFile);
 	versionObj->applyTo(version);
 }
 
-void MinecraftVersion::applyTo(InstanceVersion *version)
+void MinecraftVersion::applyTo(MinecraftProfile *version)
 {
 	// do we have this one cached?
 	if (m_versionSource == Local)

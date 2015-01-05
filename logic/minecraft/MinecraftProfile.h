@@ -27,11 +27,11 @@
 
 class OneSixInstance;
 
-class InstanceVersion : public QAbstractListModel
+class MinecraftProfile : public QAbstractListModel
 {
 	Q_OBJECT
 public:
-	explicit InstanceVersion(OneSixInstance *instance, QObject *parent = 0);
+	explicit MinecraftProfile(OneSixInstance *instance, QObject *parent = 0);
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -50,19 +50,18 @@ public:
 	bool isVanilla();
 	// remove any customizations on top of vanilla
 	bool revertToVanilla();
-	
+
 	// does this version consist of obsolete files?
 	bool hasDeprecatedVersionFiles();
 	// remove obsolete files
 	bool removeDeprecatedVersionFiles();
-	
+
 	// does this version have an FTB pack patch file?
 	bool hasFtbPack();
 	// remove FTB pack
 	bool removeFtbPack();
-	
+
 	// does this version have any jar mods?
-	bool hasJarMods();
 	void installJarMods(QStringList selectedFiles);
 	void installJarModByFilename(QString filepath);
 
@@ -71,7 +70,7 @@ public:
 	void resetOrder();
 
 	// clears and reapplies all version files
-	void reapply(const bool alreadyReseting = false);
+	void reapply();
 	void finalize();
 
 public
@@ -83,11 +82,11 @@ public:
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
 
-	static std::shared_ptr<InstanceVersion> fromJson(const QJsonObject &obj);
+	static std::shared_ptr<MinecraftProfile> fromJson(const QJsonObject &obj);
 
 private:
-	bool preremove(VersionPatchPtr patch);
-	
+	bool preremove(ProfilePatchPtr patch);
+
 	// data members
 public:
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
@@ -138,7 +137,7 @@ public:
 	 * The applet class, for some very old minecraft releases
 	 */
 	QString appletClass;
-	
+
 	/// the list of libs - both active and inactive, native and java
 	QList<OneSixLibraryPtr> libraries;
 
@@ -172,9 +171,9 @@ public:
 	*/
 	// QList<Rule> rules;
 
-	QList<VersionPatchPtr> VersionPatches;
-	VersionPatchPtr versionPatch(const QString &id);
-	VersionPatchPtr versionPatch(int index);
+	QList<ProfilePatchPtr> VersionPatches;
+	ProfilePatchPtr versionPatch(const QString &id);
+	ProfilePatchPtr versionPatch(int index);
 
 private:
 	QStringList m_externalPatches;

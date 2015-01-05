@@ -27,9 +27,9 @@
 
 #include "MultiMC.h"
 #include "logic/minecraft/VersionBuilder.h"
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/OneSixRule.h"
-#include "logic/minecraft/VersionPatch.h"
+#include "logic/minecraft/ProfilePatch.h"
 #include "logic/minecraft/VersionFile.h"
 #include "VersionBuildError.h"
 #include "MinecraftVersionList.h"
@@ -43,7 +43,7 @@ VersionBuilder::VersionBuilder()
 {
 }
 
-void VersionBuilder::build(InstanceVersion *version, OneSixInstance *instance,
+void VersionBuilder::build(MinecraftProfile *version, OneSixInstance *instance,
 						   const QStringList &external)
 {
 	VersionBuilder builder;
@@ -53,7 +53,7 @@ void VersionBuilder::build(InstanceVersion *version, OneSixInstance *instance,
 	builder.buildInternal();
 }
 
-void VersionBuilder::readJsonAndApplyToVersion(InstanceVersion *version, const QJsonObject &obj)
+void VersionBuilder::readJsonAndApplyToVersion(MinecraftProfile *version, const QJsonObject &obj)
 {
 	VersionBuilder builder;
 	builder.m_version = version;
@@ -182,7 +182,7 @@ void VersionBuilder::buildFromMultilayer()
 	// just the builtin stuff for now
 	auto minecraftList = MMC->minecraftlist();
 	auto mcversion = minecraftList->findVersion(m_instance->intendedVersionId());
-	auto minecraftPatch = std::dynamic_pointer_cast<VersionPatch>(mcversion);
+	auto minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
 	if (!minecraftPatch)
 	{
 		throw VersionIncomplete("net.minecraft");
@@ -193,7 +193,7 @@ void VersionBuilder::buildFromMultilayer()
 	// TODO: this is obviously fake.
 	QResource LWJGL(":/versions/LWJGL/2.9.1.json");
 	auto lwjgl = parseJsonFile(LWJGL.absoluteFilePath(), false, false);
-	auto lwjglPatch = std::dynamic_pointer_cast<VersionPatch>(lwjgl);
+	auto lwjglPatch = std::dynamic_pointer_cast<ProfilePatch>(lwjgl);
 	if (!lwjglPatch)
 	{
 		throw VersionIncomplete("org.lwjgl");

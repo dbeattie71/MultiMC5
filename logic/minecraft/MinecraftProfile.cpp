@@ -20,26 +20,26 @@
 #include <QJsonArray>
 #include <pathutils.h>
 
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/VersionBuilder.h"
 #include "logic/OneSixInstance.h"
 
-InstanceVersion::InstanceVersion(OneSixInstance *instance, QObject *parent)
+MinecraftProfile::MinecraftProfile(OneSixInstance *instance, QObject *parent)
 	: QAbstractListModel(parent), m_instance(instance)
 {
 	clear();
 }
 
-void InstanceVersion::reload(const QStringList &external)
+void MinecraftProfile::reload(const QStringList &external)
 {
 	m_externalPatches = external;
 	beginResetModel();
 	VersionBuilder::build(this, m_instance, m_externalPatches);
-	reapply(true);
+	reapply();
 	endResetModel();
 }
 
-void InstanceVersion::clear()
+void MinecraftProfile::clear()
 {
 	id.clear();
 	m_updateTimeString.clear();
@@ -59,12 +59,12 @@ void InstanceVersion::clear()
 	traits.clear();
 }
 
-bool InstanceVersion::canRemove(const int index) const
+bool MinecraftProfile::canRemove(const int index) const
 {
 	return VersionPatches.at(index)->isMoveable();
 }
 
-bool InstanceVersion::preremove(VersionPatchPtr patch)
+bool MinecraftProfile::preremove(ProfilePatchPtr patch)
 {
 	bool ok = true;
 	for(auto & jarmod: patch->getJarMods())
@@ -77,7 +77,7 @@ bool InstanceVersion::preremove(VersionPatchPtr patch)
 	return ok;
 }
 
-bool InstanceVersion::remove(const int index)
+bool MinecraftProfile::remove(const int index)
 {
 	if (!canRemove(index))
 		return false;
@@ -91,12 +91,12 @@ bool InstanceVersion::remove(const int index)
 	beginRemoveRows(QModelIndex(), index, index);
 	VersionPatches.removeAt(index);
 	endRemoveRows();
-	reapply(true);
+	reapply();
 	saveCurrentOrder();
 	return true;
 }
 
-bool InstanceVersion::remove(const QString id)
+bool MinecraftProfile::remove(const QString id)
 {
 	int i = 0;
 	for (auto patch : VersionPatches)
@@ -110,7 +110,7 @@ bool InstanceVersion::remove(const QString id)
 	return false;
 }
 
-QString InstanceVersion::versionFileId(const int index) const
+QString MinecraftProfile::versionFileId(const int index) const
 {
 	if (index < 0 || index >= VersionPatches.size())
 	{
@@ -119,7 +119,7 @@ QString InstanceVersion::versionFileId(const int index) const
 	return VersionPatches.at(index)->getPatchID();
 }
 
-VersionPatchPtr InstanceVersion::versionPatch(const QString &id)
+ProfilePatchPtr MinecraftProfile::versionPatch(const QString &id)
 {
 	for (auto file : VersionPatches)
 	{
@@ -131,30 +131,24 @@ VersionPatchPtr InstanceVersion::versionPatch(const QString &id)
 	return 0;
 }
 
-VersionPatchPtr InstanceVersion::versionPatch(int index)
+ProfilePatchPtr MinecraftProfile::versionPatch(int index)
 {
 	if(index < 0 || index >= VersionPatches.size())
 		return 0;
 	return VersionPatches[index];
 }
 
-
-bool InstanceVersion::hasJarMods()
-{
-	return !jarMods.isEmpty();
-}
-
-bool InstanceVersion::hasFtbPack()
+bool MinecraftProfile::hasFtbPack()
 {
 	return versionPatch("org.multimc.ftb.pack.json") != nullptr;
 }
 
-bool InstanceVersion::removeFtbPack()
+bool MinecraftProfile::removeFtbPack()
 {
 	return remove("org.multimc.ftb.pack.json");
 }
 
-bool InstanceVersion::isVanilla()
+bool MinecraftProfile::isVanilla()
 {
 	QDir patches(PathCombine(m_instance->instanceRoot(), "patches/"));
 	for(auto patchptr: VersionPatches)
@@ -169,7 +163,7 @@ bool InstanceVersion::isVanilla()
 	return true;
 }
 
-bool InstanceVersion::revertToVanilla()
+bool MinecraftProfile::revertToVanilla()
 {
 	beginResetModel();
 	// remove custom.json, if present
@@ -215,13 +209,13 @@ bool InstanceVersion::revertToVanilla()
 		else
 			it++;
 	}
-	reapply(true);
+	reapply();
 	endResetModel();
 	saveCurrentOrder();
 	return true;
 }
 
-bool InstanceVersion::hasDeprecatedVersionFiles()
+bool MinecraftProfile::hasDeprecatedVersionFiles()
 {
 	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
 		return true;
@@ -230,7 +224,7 @@ bool InstanceVersion::hasDeprecatedVersionFiles()
 	return false;
 }
 
-bool InstanceVersion::removeDeprecatedVersionFiles()
+bool MinecraftProfile::removeDeprecatedVersionFiles()
 {
 	beginResetModel();
 	// remove custom.json, if present
@@ -257,7 +251,7 @@ bool InstanceVersion::removeDeprecatedVersionFiles()
 	return true;
 }
 
-QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNormalLibs()
+QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
@@ -277,7 +271,7 @@ QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNormalLibs()
 	}
 	return output;
 }
-QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNativeLibs()
+QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNativeLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
 	for (auto lib : libraries)
@@ -290,9 +284,9 @@ QList<std::shared_ptr<OneSixLibrary> > InstanceVersion::getActiveNativeLibs()
 	return output;
 }
 
-std::shared_ptr<InstanceVersion> InstanceVersion::fromJson(const QJsonObject &obj)
+std::shared_ptr<MinecraftProfile> MinecraftProfile::fromJson(const QJsonObject &obj)
 {
-	std::shared_ptr<InstanceVersion> version(new InstanceVersion(0));
+	std::shared_ptr<MinecraftProfile> version(new MinecraftProfile(0));
 	try
 	{
 		VersionBuilder::readJsonAndApplyToVersion(version.get(), obj);
@@ -304,7 +298,7 @@ std::shared_ptr<InstanceVersion> InstanceVersion::fromJson(const QJsonObject &ob
 	return version;
 }
 
-QVariant InstanceVersion::data(const QModelIndex &index, int role) const
+QVariant MinecraftProfile::data(const QModelIndex &index, int role) const
 {
 	if (!index.isValid())
 		return QVariant();
@@ -329,7 +323,7 @@ QVariant InstanceVersion::data(const QModelIndex &index, int role) const
 	}
 	return QVariant();
 }
-QVariant InstanceVersion::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant MinecraftProfile::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (orientation == Qt::Horizontal)
 	{
@@ -348,24 +342,24 @@ QVariant InstanceVersion::headerData(int section, Qt::Orientation orientation, i
 	}
 	return QVariant();
 }
-Qt::ItemFlags InstanceVersion::flags(const QModelIndex &index) const
+Qt::ItemFlags MinecraftProfile::flags(const QModelIndex &index) const
 {
 	if (!index.isValid())
 		return Qt::NoItemFlags;
 	return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 
-int InstanceVersion::rowCount(const QModelIndex &parent) const
+int MinecraftProfile::rowCount(const QModelIndex &parent) const
 {
 	return VersionPatches.size();
 }
 
-int InstanceVersion::columnCount(const QModelIndex &parent) const
+int MinecraftProfile::columnCount(const QModelIndex &parent) const
 {
 	return 2;
 }
 
-void InstanceVersion::saveCurrentOrder() const
+void MinecraftProfile::saveCurrentOrder() const
 {
 	PatchOrder order;
 	for(auto item: VersionPatches)
@@ -377,7 +371,7 @@ void InstanceVersion::saveCurrentOrder() const
 	VersionBuilder::writeOverrideOrders(m_instance, order);
 }
 
-void InstanceVersion::move(const int index, const MoveDirection direction)
+void MinecraftProfile::move(const int index, const MoveDirection direction)
 {
 	int theirIndex;
 	if (direction == MoveUp)
@@ -388,7 +382,7 @@ void InstanceVersion::move(const int index, const MoveDirection direction)
 	{
 		theirIndex = index + 1;
 	}
-	
+
 	if (index < 0 || index >= VersionPatches.size())
 		return;
 	if (theirIndex >= rowCount())
@@ -401,7 +395,7 @@ void InstanceVersion::move(const int index, const MoveDirection direction)
 
 	auto from = versionPatch(index);
 	auto to = versionPatch(theirIndex);
-	
+
 	if (!from || !to || !to->isMoveable() || !from->isMoveable())
 	{
 		return;
@@ -412,13 +406,13 @@ void InstanceVersion::move(const int index, const MoveDirection direction)
 	saveCurrentOrder();
 	reapply();
 }
-void InstanceVersion::resetOrder()
+void MinecraftProfile::resetOrder()
 {
 	QDir(m_instance->instanceRoot()).remove("order.json");
 	reload(m_externalPatches);
 }
 
-void InstanceVersion::reapply(const bool alreadyReseting)
+void MinecraftProfile::reapply()
 {
 	clear();
 	for(auto file: VersionPatches)
@@ -428,7 +422,7 @@ void InstanceVersion::reapply(const bool alreadyReseting)
 	finalize();
 }
 
-void InstanceVersion::finalize()
+void MinecraftProfile::finalize()
 {
 	// HACK: deny april fools. my head hurts enough already.
 	QDate now = QDate::currentDate();
@@ -465,7 +459,7 @@ void InstanceVersion::finalize()
 	finalizeArguments(minecraftArguments, processArguments);
 }
 
-void InstanceVersion::installJarMods(QStringList selectedFiles)
+void MinecraftProfile::installJarMods(QStringList selectedFiles)
 {
 	for(auto filename: selectedFiles)
 	{
@@ -473,7 +467,7 @@ void InstanceVersion::installJarMods(QStringList selectedFiles)
 	}
 }
 
-void InstanceVersion::installJarModByFilename(QString filepath)
+void MinecraftProfile::installJarModByFilename(QString filepath)
 {
 	QString patchDir = PathCombine(m_instance->instanceRoot(), "patches");
 	if(!ensureFolderPathExists(patchDir))
@@ -518,7 +512,7 @@ void InstanceVersion::installJarModByFilename(QString filepath)
 	f->order = getFreeOrderNumber();
 	QString patchFileName = PathCombine(patchDir, target_id + ".json");
 	f->filename = patchFileName;
-	
+
 	QFile file(patchFileName);
 	if (!file.open(QFile::WriteOnly))
 	{
@@ -536,7 +530,7 @@ void InstanceVersion::installJarModByFilename(QString filepath)
 	saveCurrentOrder();
 }
 
-int InstanceVersion::getFreeOrderNumber()
+int MinecraftProfile::getFreeOrderNumber()
 {
 	int largest = 100;
 	// yes, I do realize this is dumb. The order thing itself is dumb. and to be removed next.

@@ -14,6 +14,7 @@ public:
 
 	void setSolderVersion(SolderVersionPtr url);
 	SolderVersionPtr solderVersion();
+	virtual QList<Mod> getJarMods() const override;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
 private:

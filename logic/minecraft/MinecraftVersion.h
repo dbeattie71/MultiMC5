@@ -20,15 +20,15 @@
 #include <QDateTime>
 
 #include "logic/BaseVersion.h"
-#include "VersionPatch.h"
+#include "ProfilePatch.h"
 #include "VersionFile.h"
 #include "VersionSource.h"
 
-class InstanceVersion;
+class MinecraftProfile;
 class MinecraftVersion;
 typedef std::shared_ptr<MinecraftVersion> MinecraftVersionPtr;
 
-class MinecraftVersion : public BaseVersion, public VersionPatch
+class MinecraftVersion : public BaseVersion, public ProfilePatch
 {
 public: /* methods */
 	bool usesLegacyLauncher();
@@ -37,7 +37,7 @@ public: /* methods */
 	virtual QString typeString() const override;
 	virtual bool hasJarMods() override;
 	virtual bool isMinecraftVersion() override;
-	virtual void applyTo(InstanceVersion *version) override;
+	virtual void applyTo(MinecraftProfile *version) override;
 	virtual int getOrder();
 	virtual void setOrder(int order);
 	virtual QList<JarmodPtr> getJarMods() override;
@@ -50,7 +50,7 @@ public: /* methods */
 	virtual bool isCustom();
 
 private: /* methods */
-	void applyFileTo(InstanceVersion *version);
+	void applyFileTo(MinecraftProfile *version);
 
 public: /* data */
 	/// The URL that this version will be downloaded from. maybe.
@@ -92,7 +92,7 @@ public: /* data */
 
 	/// order of this file... default = -2
 	int order = -2;
-	
+
 	/// an update available from Mojang
 	MinecraftVersionPtr upstreamUpdate;
 };

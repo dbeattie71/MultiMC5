@@ -493,8 +493,8 @@ SET(MULTIMC_SOURCES
 
 	# OneSix version json infrastructure
 	logic/minecraft/GradleSpecifier.h
-	logic/minecraft/InstanceVersion.cpp
-	logic/minecraft/InstanceVersion.h
+	logic/minecraft/MinecraftProfile.cpp
+	logic/minecraft/MinecraftProfile.h
 	logic/minecraft/JarMod.cpp
 	logic/minecraft/JarMod.h
 	logic/minecraft/MinecraftVersion.cpp
@@ -516,7 +516,7 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/VersionBuildError.h
 	logic/minecraft/VersionFile.cpp
 	logic/minecraft/VersionFile.h
-	logic/minecraft/VersionPatch.h
+	logic/minecraft/ProfilePatch.h
 	logic/minecraft/VersionSource.h
 
 	# A Recursive file system watcher

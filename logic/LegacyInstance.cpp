@@ -158,7 +158,7 @@ void LegacyInstance::cleanupAfterRun()
 	// FIXME: delete the launcher and icons and whatnot.
 }
 
-std::shared_ptr<ModList> LegacyInstance::coreModList()
+std::shared_ptr<ModList> LegacyInstance::coreModList() const
 {
 	if (!core_mod_list)
 	{
@@ -168,7 +168,7 @@ std::shared_ptr<ModList> LegacyInstance::coreModList()
 	return core_mod_list;
 }
 
-std::shared_ptr<ModList> LegacyInstance::jarModList()
+std::shared_ptr<ModList> LegacyInstance::jarModList() const
 {
 	if (!jar_mod_list)
 	{
@@ -180,13 +180,18 @@ std::shared_ptr<ModList> LegacyInstance::jarModList()
 	return jar_mod_list;
 }
 
+QList<Mod> LegacyInstance::getJarMods() const
+{
+	return jarModList()->allMods();
+}
+
 void LegacyInstance::jarModsChanged()
 {
 	QLOG_INFO() << "Jar mods of instance " << name() << " have changed. Jar will be rebuilt.";
 	setShouldRebuild(true);
 }
 
-std::shared_ptr<ModList> LegacyInstance::loaderModList()
+std::shared_ptr<ModList> LegacyInstance::loaderModList() const
 {
 	if (!loader_mod_list)
 	{
@@ -196,7 +201,7 @@ std::shared_ptr<ModList> LegacyInstance::loaderModList()
 	return loader_mod_list;
 }
 
-std::shared_ptr<ModList> LegacyInstance::texturePackList()
+std::shared_ptr<ModList> LegacyInstance::texturePackList() const
 {
 	if (!texture_pack_list)
 	{

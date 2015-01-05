@@ -1,13 +1,13 @@
 #include "SolderInstance.h"
 
-#include "logic/minecraft/InstanceVersion.h"
+#include "logic/minecraft/MinecraftProfile.h"
 #include "logic/tasks/SequentialTask.h"
 #include "logic/OneSixUpdate.h"
 #include "MultiMC.h"
 #include <pathutils.h>
 #include <JlCompress.h>
 
-struct ModEntry
+struct SolderModEntry
 {
 	QString name;
 	QString version;
@@ -44,11 +44,11 @@ private slots:
 	void packVersionStart();
 	void packVersionFinished();
 	void packVersionFailed();
+	void versionProgress(int, qint64, qint64);
 
 	void packStart();
 	void packFinished();
 	void packFailed();
-	void versionProgress(int, qint64, qint64);
 	void packProgress(qint64,qint64);
 
 private:
@@ -56,7 +56,7 @@ private:
 	NetJobPtr packDownload;
 
 	SolderInstance *m_inst;
-	QList <ModEntry> m_mods;
+	QList <SolderModEntry> m_mods;
 };
 
 void SolderUpdate::executeTask()
@@ -129,7 +129,7 @@ void SolderUpdate::packStart()
 	for(auto mod: mods)
 	{
 		auto modObj = mod.toObject();
-		ModEntry e;
+		SolderModEntry e;
 		e.name = modObj.value("name").toString();
 		e.version = modObj.value("version").toString();
 		e.url = modObj.value("url").toString();
@@ -162,7 +162,7 @@ void SolderUpdate::packFinished()
 		auto files = JlCompress::extractDir(filename, m_inst->minecraftRoot());
 		QLOG_INFO() << "Extracted" << filename << files.join(", ");
 	}
-	auto status = m_inst->settings().set("packStatus", QString("Extracted"));
+	m_inst->settings().set("packStatus", QString("Extracted"));
 	emitSucceeded();
 }
 
@@ -179,7 +179,6 @@ SolderInstance::SolderInstance(const QString &rootDir, SettingsObject *settings,
 	settings->registerSetting("packStatus", "NotInstalled");
 }
 
-//FIXME: this is bullshit. we will need to convert instance configs to JSON at some point
 void SolderInstance::setSolderVersion(SolderVersionPtr url)
 {
 	m_solderVersion = url;
@@ -187,7 +186,18 @@ void SolderInstance::setSolderVersion(SolderVersionPtr url)
 	settings().set("solderPack", QString::fromUtf8(doc.toJson(QJsonDocument::Compact)));
 }
 
-//FIXME: this is bullshit. we will need to convert instance configs to JSON at some point
+QList<Mod> SolderInstance::getJarMods() const
+{
+	QList<Mod> mods;
+	QFileInfo modpackJar = PathCombine(minecraftRoot(), "bin", "modpack.jar");
+	if(modpackJar.exists())
+	{
+		mods.append(Mod(modpackJar));
+	}
+	return mods;
+}
+
+
 SolderVersionPtr SolderInstance::solderVersion()
 {
 	if(m_solderVersion)
