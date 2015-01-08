@@ -244,7 +244,7 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 		return;
 	}
 
-	if (m_inst->profileIsCustom())
+	if (!m_version->isVanilla())
 	{
 		auto result = CustomMessageBox::selectable(
 			this, tr("Are you sure?"),
@@ -272,31 +272,6 @@ void VersionPage::on_changeMCVersionBtn_clicked()
 
 void VersionPage::on_forgeBtn_clicked()
 {
-	// FIXME: use actual model, not reloading. Move logic to model.
-	if (m_version->hasFtbPack())
-	{
-		if (QMessageBox::question(
-				this, tr("Revert?"),
-				tr("This action will remove the FTB pack version patch. Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeFtbPack();
-		reloadMinecraftProfile();
-	}
-	if (m_version->hasDeprecatedVersionFiles())
-	{
-		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove deprecated version files "
-									 "(custom.json and version.json). Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeDeprecatedVersionFiles();
-		reloadMinecraftProfile();
-	}
 	VersionSelectDialog vselect(MMC->forgelist().get(), tr("Select Forge version"), this);
 	vselect.setExactFilter(1, m_inst->currentVersionId());
 	vselect.setEmptyString(tr("No Forge versions are currently available for Minecraft ") +
@@ -311,30 +286,6 @@ void VersionPage::on_forgeBtn_clicked()
 
 void VersionPage::on_liteloaderBtn_clicked()
 {
-	if (m_version->hasFtbPack())
-	{
-		if (QMessageBox::question(
-				this, tr("Revert?"),
-				tr("This action will remove the FTB pack version patch. Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeFtbPack();
-		reloadMinecraftProfile();
-	}
-	if (m_version->hasDeprecatedVersionFiles())
-	{
-		if (QMessageBox::question(this, tr("Revert?"),
-								  tr("This action will remove deprecated version files "
-									 "(custom.json and version.json). Continue?")) !=
-			QMessageBox::Yes)
-		{
-			return;
-		}
-		m_version->removeDeprecatedVersionFiles();
-		reloadMinecraftProfile();
-	}
 	VersionSelectDialog vselect(MMC->liteloaderlist().get(), tr("Select LiteLoader version"),
 								this);
 	vselect.setExactFilter(1, m_inst->currentVersionId());
@@ -364,8 +315,7 @@ void VersionPage::versionCurrent(const QModelIndex &current, const QModelIndex &
 		ui->moveLibraryUpBtn->setEnabled(enabled);
 	}
 	QString selectedId = m_version->versionFileId(current.row());
-	if (selectedId == "net.minecraft" || selectedId == "org.multimc.custom.json" ||
-		selectedId == "org.multimc.version.json")
+	if (selectedId == "net.minecraft")
 	{
 		ui->changeMCVersionBtn->setEnabled(true);
 	}

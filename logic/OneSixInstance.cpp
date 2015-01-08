@@ -278,7 +278,6 @@ std::shared_ptr<ModList> OneSixInstance::texturePackList() const
 bool OneSixInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
-	QFile::remove(PathCombine(instanceRoot(), "version.json"));
 	clearProfile();
 	return true;
 }
@@ -309,24 +308,6 @@ bool OneSixInstance::shouldUpdate() const
 	return true;
 }
 
-bool OneSixInstance::profileIsCustom()
-{
-	if (m_version)
-	{
-		return !m_version->isVanilla();
-	}
-	return false;
-}
-
-bool OneSixInstance::profileIsFTBPack()
-{
-	if (m_version)
-	{
-		return m_version->hasFtbPack();
-	}
-	return false;
-}
-
 QString OneSixInstance::currentVersionId() const
 {
 	return intendedVersionId();
@@ -336,7 +317,7 @@ void OneSixInstance::reloadProfile()
 {
 	try
 	{
-		m_version->reload(externalPatches());
+		m_version->reload();
 		unsetFlag(VersionBrokenFlag);
 		emit versionReloaded();
 	}
@@ -367,10 +348,6 @@ std::shared_ptr<MinecraftProfile> OneSixInstance::getMinecraftProfile() const
 QString OneSixInstance::getStatusbarDescription()
 {
 	QStringList traits;
-	if (profileIsCustom())
-	{
-		traits.append(tr("custom"));
-	}
 	if (flags() & VersionBrokenFlag)
 	{
 		traits.append(tr("broken"));
@@ -399,11 +376,6 @@ QDir OneSixInstance::jarmodsPath() const
 QDir OneSixInstance::versionsPath() const
 {
 	return QDir::current().absoluteFilePath("versions");
-}
-
-QStringList OneSixInstance::externalPatches() const
-{
-	return QStringList();
 }
 
 bool OneSixInstance::providesVersionFile() const

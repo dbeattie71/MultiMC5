@@ -30,11 +30,10 @@ MinecraftProfile::MinecraftProfile(OneSixInstance *instance, QObject *parent)
 	clear();
 }
 
-void MinecraftProfile::reload(const QStringList &external)
+void MinecraftProfile::reload()
 {
-	m_externalPatches = external;
 	beginResetModel();
-	VersionBuilder::build(this, m_instance, m_externalPatches);
+	VersionBuilder::build(this, m_instance);
 	reapply();
 	endResetModel();
 }
@@ -138,54 +137,19 @@ ProfilePatchPtr MinecraftProfile::versionPatch(int index)
 	return VersionPatches[index];
 }
 
-bool MinecraftProfile::hasFtbPack()
-{
-	return versionPatch("org.multimc.ftb.pack.json") != nullptr;
-}
-
-bool MinecraftProfile::removeFtbPack()
-{
-	return remove("org.multimc.ftb.pack.json");
-}
-
 bool MinecraftProfile::isVanilla()
 {
-	QDir patches(PathCombine(m_instance->instanceRoot(), "patches/"));
 	for(auto patchptr: VersionPatches)
 	{
 		if(patchptr->isCustom())
 			return false;
 	}
-	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
-		return false;
-	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "version.json")))
-		return false;
 	return true;
 }
 
 bool MinecraftProfile::revertToVanilla()
 {
 	beginResetModel();
-	// remove custom.json, if present
-	QString customPath = PathCombine(m_instance->instanceRoot(), "custom.json");
-	if(QFile::exists(customPath))
-	{
-		if(!QFile::remove(customPath))
-		{
-			endResetModel();
-			return false;
-		}
-	}
-	// remove version.json, if present
-	QString versionPath = PathCombine(m_instance->instanceRoot(), "version.json");
-	if(QFile::exists(versionPath))
-	{
-		if(!QFile::remove(versionPath))
-		{
-			endResetModel();
-			return false;
-		}
-	}
 	// remove patches, if present
 	auto it = VersionPatches.begin();
 	while (it != VersionPatches.end())
@@ -212,42 +176,6 @@ bool MinecraftProfile::revertToVanilla()
 	reapply();
 	endResetModel();
 	saveCurrentOrder();
-	return true;
-}
-
-bool MinecraftProfile::hasDeprecatedVersionFiles()
-{
-	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "custom.json")))
-		return true;
-	if(QFile::exists(PathCombine(m_instance->instanceRoot(), "version.json")))
-		return true;
-	return false;
-}
-
-bool MinecraftProfile::removeDeprecatedVersionFiles()
-{
-	beginResetModel();
-	// remove custom.json, if present
-	QString customPath = PathCombine(m_instance->instanceRoot(), "custom.json");
-	if(QFile::exists(customPath))
-	{
-		if(!QFile::remove(customPath))
-		{
-			endResetModel();
-			return false;
-		}
-	}
-	// remove version.json, if present
-	QString versionPath = PathCombine(m_instance->instanceRoot(), "version.json");
-	if(QFile::exists(versionPath))
-	{
-		if(!QFile::remove(versionPath))
-		{
-			endResetModel();
-			return false;
-		}
-	}
-	endResetModel();
 	return true;
 }
 
@@ -409,7 +337,7 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 void MinecraftProfile::resetOrder()
 {
 	QDir(m_instance->instanceRoot()).remove("order.json");
-	reload(m_externalPatches);
+	reload();
 }
 
 void MinecraftProfile::reapply()

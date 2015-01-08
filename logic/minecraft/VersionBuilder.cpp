@@ -24,6 +24,7 @@
 #include <QDir>
 #include <qresource.h>
 #include <modutils.h>
+#include <pathutils.h>
 
 #include "MultiMC.h"
 #include "logic/minecraft/VersionBuilder.h"
@@ -43,13 +44,11 @@ VersionBuilder::VersionBuilder()
 {
 }
 
-void VersionBuilder::build(MinecraftProfile *version, OneSixInstance *instance,
-						   const QStringList &external)
+void VersionBuilder::build(MinecraftProfile *version, OneSixInstance *instance)
 {
 	VersionBuilder builder;
 	builder.m_version = version;
 	builder.m_instance = instance;
-	builder.external_patches = external;
 	builder.buildInternal();
 }
 
@@ -61,45 +60,11 @@ void VersionBuilder::readJsonAndApplyToVersion(MinecraftProfile *version, const 
 	builder.readJsonAndApply(obj);
 }
 
-void VersionBuilder::buildFromCustomJson()
-{
-	QLOG_INFO() << "Building version from custom.json within the instance.";
-	QLOG_INFO() << "Reading custom.json";
-	auto file = parseJsonFile(QFileInfo(instance_root.absoluteFilePath("custom.json")), false);
-	file->name = "custom.json";
-	file->filename = "custom.json";
-	file->fileId = "org.multimc.custom.json";
-	file->order = -1;
-	file->version = QString();
-	m_version->VersionPatches.append(file);
-	m_version->finalize();
-	return;
-}
-
-void VersionBuilder::buildFromVersionJson()
-{
-	QLOG_INFO() << "Building version from version.json and patches within the instance.";
-	QLOG_INFO() << "Reading version.json";
-	auto file = parseJsonFile(QFileInfo(instance_root.absoluteFilePath("version.json")), false);
-	file->name = "Minecraft";
-	file->fileId = "org.multimc.version.json";
-	file->order = -1;
-	file->version = m_instance->intendedVersionId();
-	file->mcVersion = m_instance->intendedVersionId();
-	m_version->VersionPatches.append(file);
-
-	// load all patches, put into map for ordering, apply in the right order
-	readInstancePatches();
-
-	// some final touches
-	m_version->finalize();
-}
-
 void VersionBuilder::readInstancePatches()
 {
 	PatchOrder userOrder;
 	readOverrideOrders(m_instance, userOrder);
-	QDir patches(instance_root.absoluteFilePath("patches/"));
+	QDir patches(PathCombine(m_instance->instanceRoot(),"patches"));
 
 	// first, load things by sort order.
 	for (auto id : userOrder)
@@ -157,29 +122,11 @@ void VersionBuilder::readInstancePatches()
 	}
 }
 
-void VersionBuilder::buildFromExternalPatches()
+void VersionBuilder::buildInternal()
 {
-	QLOG_INFO() << "Building version from external files.";
-	int externalOrder = -1;
-	for (auto fileName : external_patches)
-	{
-		QLOG_INFO() << "Reading" << fileName;
-		auto file = parseJsonFile(QFileInfo(fileName), false, fileName.endsWith("pack.json"));
-		file->name = QFileInfo(fileName).fileName();
-		file->fileId = "org.multimc.external." + file->name;
-		file->order = (externalOrder += 1);
-		file->version = QString();
-		file->mcVersion = QString();
-		m_version->VersionPatches.append(file);
-	}
-	// some final touches
-	m_version->finalize();
-}
+	m_version->VersionPatches.clear();
 
-void VersionBuilder::buildFromMultilayer()
-{
-	QLOG_INFO() << "Building version from multilayered sources.";
-	// just the builtin stuff for now
+	// Minecraft - just the builtin stuff for now
 	auto minecraftList = MMC->minecraftlist();
 	auto mcversion = minecraftList->findVersion(m_instance->intendedVersionId());
 	auto minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
@@ -206,31 +153,6 @@ void VersionBuilder::buildFromMultilayer()
 	readInstancePatches();
 
 	m_version->finalize();
-}
-
-void VersionBuilder::buildInternal()
-{
-	m_version->VersionPatches.clear();
-	instance_root = QDir(m_instance->instanceRoot());
-	// if we do external files, do just those.
-	if (!external_patches.isEmpty())
-	{
-		buildFromExternalPatches();
-	}
-	// else, if there's custom json, we just do that.
-	else if (QFile::exists(instance_root.absoluteFilePath("custom.json")))
-	{
-		buildFromCustomJson();
-	}
-	// version.json -> patches/*.json
-	else if (QFile::exists(instance_root.absoluteFilePath("version.json")))
-	{
-		buildFromVersionJson();
-	}
-	else
-	{
-		buildFromMultilayer();
-	}
 }
 
 void VersionBuilder::readJsonAndApply(const QJsonObject &obj)

@@ -256,8 +256,7 @@ QJsonDocument VersionFile::toJson(bool saveOrder)
 
 bool VersionFile::isMinecraftVersion()
 {
-	return (fileId == "org.multimc.version.json") || (fileId == "net.minecraft") ||
-		   (fileId == "org.multimc.custom.json");
+	return fileId == "net.minecraft";
 }
 
 bool VersionFile::hasJarMods()

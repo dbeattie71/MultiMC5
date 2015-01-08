@@ -39,7 +39,7 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	void reload(const QStringList &external = QStringList());
+	void reload();
 	void clear();
 
 	bool canRemove(const int index) const;
@@ -50,16 +50,6 @@ public:
 	bool isVanilla();
 	// remove any customizations on top of vanilla
 	bool revertToVanilla();
-
-	// does this version consist of obsolete files?
-	bool hasDeprecatedVersionFiles();
-	// remove obsolete files
-	bool removeDeprecatedVersionFiles();
-
-	// does this version have an FTB pack patch file?
-	bool hasFtbPack();
-	// remove FTB pack
-	bool removeFtbPack();
 
 	// does this version have any jar mods?
 	void installJarMods(QStringList selectedFiles);
@@ -176,7 +166,6 @@ public:
 	ProfilePatchPtr versionPatch(int index);
 
 private:
-	QStringList m_externalPatches;
 	OneSixInstance *m_instance;
 	void saveCurrentOrder() const;
 	int getFreeOrderNumber();

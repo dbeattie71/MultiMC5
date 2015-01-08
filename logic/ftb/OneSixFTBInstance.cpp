@@ -109,11 +109,13 @@ QDir OneSixFTBInstance::versionsPath() const
 	return QDir(MMC->settings()->get("FTBRoot").toString() + "/versions");
 }
 
+/*
 QStringList OneSixFTBInstance::externalPatches() const
 {
 	return QStringList() << versionsPath().absoluteFilePath(intendedVersionId() + "/" + intendedVersionId() + ".json")
 						 << minecraftRoot() + "/pack.json";
 }
+*/
 
 bool OneSixFTBInstance::providesVersionFile() const
 {

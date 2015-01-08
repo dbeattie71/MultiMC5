@@ -78,18 +78,11 @@ public:
 	/// get the current full version info
 	std::shared_ptr<MinecraftProfile> getMinecraftProfile() const;
 
-	/// is the current version original, or custom?
-	virtual bool profileIsCustom() override;
-
-	/// does this instance have an FTB pack patch inside?
-	bool profileIsFTBPack();
-
 	virtual QString getStatusbarDescription() override;
 
 	virtual QDir jarmodsPath() const;
 	virtual QDir librariesPath() const;
 	virtual QDir versionsPath() const;
-	virtual QStringList externalPatches() const;
 	virtual bool providesVersionFile() const;
 
 	bool reload() override;

@@ -22,7 +22,6 @@ public:
 
 	QDir librariesPath() const override;
 	QDir versionsPath() const override;
-	QStringList externalPatches() const override;
 	bool providesVersionFile() const override;
 
 private:

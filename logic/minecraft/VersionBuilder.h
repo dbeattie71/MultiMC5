@@ -30,7 +30,7 @@ class VersionBuilder
 {
 	VersionBuilder();
 public:
-	static void build(MinecraftProfile *version, OneSixInstance *instance, const QStringList &external);
+	static void build(MinecraftProfile *version, OneSixInstance *instance);
 	static void readJsonAndApplyToVersion(MinecraftProfile *version, const QJsonObject &obj);
 	static VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
 	static VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo);
@@ -41,8 +41,6 @@ public:
 private:
 	MinecraftProfile *m_version;
 	OneSixInstance *m_instance;
-	QStringList external_patches;
-	QDir instance_root;
 
 	void buildInternal();
 	void buildFromExternalPatches();

@@ -100,8 +100,6 @@ public:
 	virtual QString intendedVersionId() const = 0;
 	virtual bool setIntendedVersionId(QString version) = 0;
 
-	virtual bool profileIsCustom() = 0;
-
 	/*!
 	 * The instance's current version.
 	 * This value represents the instance's current version. If this value is
