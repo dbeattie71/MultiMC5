@@ -140,7 +140,7 @@ void SolderUpdate::packStart()
 	QLOG_INFO() << "Using minecraft" << mcVersion;
 
 	setStatus(tr("Downloading pack data"));
-	packDownload = std::make_shared<NetJob>("Solder pack packages");
+	packDownload = NetJobPtr(new NetJob("Solder pack packages"));
 	for(auto & mod: m_mods)
 	{
 		auto entry = MMC->metacache()->resolveEntry("cache", mod.cacheFile());
