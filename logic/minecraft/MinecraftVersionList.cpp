@@ -31,6 +31,45 @@
 
 static const char * localVersionCache = "versions/versions.dat";
 
+class MCVListLoadTask : public Task
+{
+	Q_OBJECT
+
+public:
+	explicit MCVListLoadTask(MinecraftVersionList *vlist);
+	virtual ~MCVListLoadTask() override{};
+
+	virtual void executeTask() override;
+
+protected
+slots:
+	void list_downloaded();
+
+protected:
+	QNetworkReply *vlistReply;
+	MinecraftVersionList *m_list;
+	MinecraftVersion *m_currentStable;
+};
+
+class MCVListVersionUpdateTask : public Task
+{
+	Q_OBJECT
+
+public:
+	explicit MCVListVersionUpdateTask(MinecraftVersionList *vlist, QString updatedVersion);
+	virtual ~MCVListVersionUpdateTask() override{};
+	virtual void executeTask() override;
+
+protected
+slots:
+	void json_downloaded();
+
+protected:
+	NetJobPtr specificVersionDownloadJob;
+	QString versionToUpdate;
+	MinecraftVersionList *m_list;
+};
+
 class ListLoadError : public MMCError
 {
 public:
@@ -523,7 +562,7 @@ void MinecraftVersionList::saveCachedList()
 		entriesArr.append(entryObj);
 	}
 	toplevel.insert("versions", entriesArr);
-	
+
 	{
 		bool someLatest = false;
 		QJsonObject latestObj;
@@ -542,7 +581,7 @@ void MinecraftVersionList::saveCachedList()
 			toplevel.insert("latest", latestObj);
 		}
 	}
-	
+
 	QJsonDocument doc(toplevel);
 	QByteArray jsonData = doc.toBinaryData();
 	qint64 result = tfile.write(jsonData);
@@ -593,3 +632,5 @@ void MinecraftVersionList::finalizeUpdate(QString version)
 
 	saveCachedList();
 }
+
+#include "MinecraftVersionList.moc"
