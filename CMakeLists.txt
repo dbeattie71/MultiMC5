@@ -392,8 +392,8 @@ SET(MULTIMC_SOURCES
 	logic/ModList.cpp
 
 	# sets and maps for deciding based on versions
-	logic/VersionFilterData.h
-	logic/VersionFilterData.cpp
+	logic/minecraft/VersionFilterData.h
+	logic/minecraft/VersionFilterData.cpp
 
 	# Instance launch
 	logic/MinecraftProcess.h
@@ -509,6 +509,8 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/OpSys.h
 	logic/minecraft/ParseUtils.cpp
 	logic/minecraft/ParseUtils.h
+	logic/minecraft/ProfileUtils.cpp
+	logic/minecraft/ProfileUtils.h
 	logic/minecraft/RawLibrary.cpp
 	logic/minecraft/RawLibrary.h
 	logic/minecraft/VersionBuilder.cpp

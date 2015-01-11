@@ -30,7 +30,7 @@
 #include "gui/dialogs/ModEditDialogCommon.h"
 #include "logic/ModList.h"
 #include "logic/Mod.h"
-#include "logic/VersionFilterData.h"
+#include "logic/minecraft/VersionFilterData.h"
 
 ModFolderPage::ModFolderPage(BaseInstance *inst, std::shared_ptr<ModList> mods, QString id,
 							 QString iconName, QString displayName, QString helpPage,

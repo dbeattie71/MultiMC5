@@ -20,7 +20,7 @@
 #include "logic/tasks/Task.h"
 #include "logic/OneSixInstance.h"
 #include "logic/forge/ForgeVersionList.h"
-#include "logic/VersionFilterData.h"
+#include "logic/minecraft/VersionFilterData.h"
 #include "gui/dialogs/ProgressDialog.h"
 
 #include <quazip.h>

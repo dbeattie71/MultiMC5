@@ -26,7 +26,6 @@
 
 class MCVListLoadTask;
 class MCVListVersionUpdateTask;
-class QNetworkReply;
 
 class MinecraftVersionList : public BaseVersionList
 {

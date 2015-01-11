@@ -1,5 +1,5 @@
 #include "SolderVersion.h"
-#include "logic/VersionFilterData.h"
+#include "logic/minecraft/VersionFilterData.h"
 #include <QObject>
 #include <modutils.h>
 

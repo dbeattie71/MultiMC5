@@ -43,10 +43,6 @@ private:
 	OneSixInstance *m_instance;
 
 	void buildInternal();
-	void buildFromExternalPatches();
-	void buildFromCustomJson();
-	void buildFromVersionJson();
-	void buildFromMultilayer();
 
 	void readInstancePatches();
 

@@ -25,8 +25,10 @@
 #include "logic/net/URLConstants.h"
 
 #include "ParseUtils.h"
+#include "ProfileUtils.h"
 #include "VersionBuilder.h"
-#include <logic/VersionFilterData.h>
+#include "VersionFilterData.h"
+
 #include <pathutils.h>
 
 static const char * localVersionCache = "versions/versions.dat";
@@ -481,21 +483,9 @@ void MCVListVersionUpdateTask::json_downloaded()
 		emitFailed(tr("Couldn't process version file: %1").arg(e.cause()));
 		return;
 	}
-	QList<RawLibraryPtr> filteredLibs;
-	QList<RawLibraryPtr> lwjglLibs;
 
-	for (auto lib : file->overwriteLibs)
-	{
-		if (g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
-		{
-			lwjglLibs.append(lib);
-		}
-		else
-		{
-			filteredLibs.append(lib);
-		}
-	}
-	file->overwriteLibs = filteredLibs;
+	// Strip LWJGL from the version file. We use our own.
+	ProfileUtils::removeLwjglFromPatch(file);
 
 	// TODO: recognize and add LWJGL versions here.
 
