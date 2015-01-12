@@ -26,14 +26,12 @@ class OtherLogsPage;
 
 class RecursiveFileSystemWatcher;
 
-class BaseInstance;
-
 class OtherLogsPage : public QWidget, public BasePage
 {
 	Q_OBJECT
 
 public:
-	explicit OtherLogsPage(BaseInstance *instance, QWidget *parent = 0);
+	explicit OtherLogsPage(QString path, QWidget *parent = 0);
 	~OtherLogsPage();
 
 	QString id() const override
@@ -65,7 +63,7 @@ private slots:
 
 private:
 	Ui::OtherLogsPage *ui;
-	BaseInstance *m_instance;
+	QString m_path;
 	RecursiveFileSystemWatcher *m_watcher;
 	QString m_currentFile;
 

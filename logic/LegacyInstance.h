@@ -15,13 +15,13 @@
 
 #pragma once
 
-#include "BaseInstance.h"
+#include "logic/minecraft/MinecraftInstance.h"
 #include "gui/pages/BasePageProvider.h"
 
 class ModList;
 class Task;
 
-class LegacyInstance : public BaseInstance, public BasePageProvider
+class LegacyInstance : public MinecraftInstance, public BasePageProvider
 {
 	Q_OBJECT
 public:
@@ -105,7 +105,7 @@ public:
 	virtual void setShouldUpdate(bool val) override;
 	virtual std::shared_ptr<Task> doUpdate() override;
 
-	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) override;
+	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) override;
 	virtual void cleanupAfterRun() override;
 
 	virtual QString getStatusbarDescription() override;

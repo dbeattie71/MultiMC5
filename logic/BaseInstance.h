@@ -30,7 +30,7 @@ class ModList;
 class QDialog;
 class QDir;
 class Task;
-class MinecraftProcess;
+class BaseProcess;
 class OneSixUpdate;
 class BaseInstancePrivate;
 
@@ -76,9 +76,6 @@ public:
 	/// Path to the instance's root directory.
 	QString instanceRoot() const;
 
-	/// Path to the instance's minecraft directory.
-	QString minecraftRoot() const;
-
 	QString name() const;
 	void setName(QString val);
 
@@ -109,26 +106,10 @@ public:
 	virtual QString currentVersionId() const = 0;
 
 	/*!
-	 * Whether or not Minecraft should be downloaded when the instance is launched.
+	 * Whether or not 'the game' should be downloaded when the instance is launched.
 	 */
 	virtual bool shouldUpdate() const = 0;
 	virtual void setShouldUpdate(bool val) = 0;
-
-	//////  Mod Lists  //////
-	virtual std::shared_ptr<ModList> resourcePackList() const
-	{
-		return nullptr;
-	}
-	virtual std::shared_ptr<ModList> texturePackList() const
-	{
-		return nullptr;
-	}
-
-	/// get all jar mods applicable to this instance's jar. FIXME: nuke.
-	virtual QList<Mod> getJarMods() const
-	{
-		return QList<Mod>();
-	}
 
 	/// Traits. Normally inside the version, depends on instance implementation.
 	virtual QSet <QString> traits() = 0;
@@ -159,8 +140,8 @@ public:
 	/// returns a valid update task
 	virtual std::shared_ptr<Task> doUpdate() = 0;
 
-	/// returns a valid minecraft process, ready for launch with the given account.
-	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) = 0;
+	/// returns a valid process, ready for launch with the given account.
+	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) = 0;
 
 	/// do any necessary cleanups after the instance finishes. also runs before
 	/// 'prepareForLaunch'

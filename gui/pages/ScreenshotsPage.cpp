@@ -208,7 +208,7 @@ public:
 	}
 };
 
-ScreenshotsPage::ScreenshotsPage(BaseInstance *instance, QWidget *parent)
+ScreenshotsPage::ScreenshotsPage(QString path, QWidget *parent)
 	: QWidget(parent), ui(new Ui::ScreenshotsPage)
 {
 	m_model.reset(new QFileSystemModel());
@@ -218,7 +218,7 @@ ScreenshotsPage::ScreenshotsPage(BaseInstance *instance, QWidget *parent)
 	m_model->setReadOnly(false);
 	m_model->setNameFilters({"*.png"});
 	m_model->setNameFilterDisables(false);
-	m_folder = PathCombine(instance->minecraftRoot(), "screenshots");
+	m_folder = path;
 	m_valid = ensureFolderPathExists(m_folder);
 
 	ui->setupUi(this);

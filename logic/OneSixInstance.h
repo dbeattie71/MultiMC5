@@ -15,13 +15,13 @@
 
 #pragma once
 
-#include "BaseInstance.h"
+#include "logic/minecraft/MinecraftInstance.h"
 
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/ModList.h"
 #include "gui/pages/BasePageProvider.h"
 
-class OneSixInstance : public BaseInstance, public BasePageProvider
+class OneSixInstance : public MinecraftInstance, public BasePageProvider
 {
 	Q_OBJECT
 public:
@@ -53,7 +53,7 @@ public:
 	virtual QString instanceConfigFolder() const override;
 
 	virtual std::shared_ptr<Task> doUpdate() override;
-	virtual bool prepareForLaunch(AuthSessionPtr account, QString & launchScript) override;
+	virtual BaseProcess *prepareForLaunch(AuthSessionPtr account) override;
 
 	virtual void cleanupAfterRun() override;
 

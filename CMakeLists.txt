@@ -382,6 +382,8 @@ SET(MULTIMC_SOURCES
 
 	# LOGIC - Base classes and infrastructure
 	logic/BaseVersion.h
+	logic/BaseProcess.h
+	logic/BaseProcess.cpp
 	logic/InstanceFactory.h
 	logic/InstanceFactory.cpp
 	logic/BaseInstance.h
@@ -394,10 +396,6 @@ SET(MULTIMC_SOURCES
 	# sets and maps for deciding based on versions
 	logic/minecraft/VersionFilterData.h
 	logic/minecraft/VersionFilterData.cpp
-
-	# Instance launch
-	logic/MinecraftProcess.h
-	logic/MinecraftProcess.cpp
 
 	# Annoying nag screen logic
 	logic/NagUtils.h
@@ -491,12 +489,16 @@ SET(MULTIMC_SOURCES
 	logic/JarUtils.h
 	logic/JarUtils.cpp
 
-	# OneSix version json infrastructure
+	# Minecraft support
 	logic/minecraft/GradleSpecifier.h
 	logic/minecraft/MinecraftProfile.cpp
 	logic/minecraft/MinecraftProfile.h
 	logic/minecraft/JarMod.cpp
 	logic/minecraft/JarMod.h
+	logic/minecraft/MinecraftInstance.cpp
+	logic/minecraft/MinecraftInstance.h
+	logic/minecraft/MinecraftProcess.cpp
+	logic/minecraft/MinecraftProcess.h
 	logic/minecraft/MinecraftVersion.cpp
 	logic/minecraft/MinecraftVersion.h
 	logic/minecraft/MinecraftVersionList.cpp

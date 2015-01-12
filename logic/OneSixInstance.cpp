@@ -24,10 +24,10 @@
 #include "logic/OneSixUpdate.h"
 #include "logic/minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
+#include "logic/minecraft/MinecraftProcess.h"
 
 #include "logic/assets/AssetsUtils.h"
-#include "icons/IconList.h"
-#include "logic/MinecraftProcess.h"
+#include "logic/icons/IconList.h"
 #include "gui/pagedialog/PageDialog.h"
 #include "gui/pages/VersionPage.h"
 #include "gui/pages/ModFolderPage.h"
@@ -39,7 +39,7 @@
 #include "gui/pages/OtherLogsPage.h"
 
 OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings, QObject *parent)
-	: BaseInstance(rootDir, settings, parent)
+	: MinecraftInstance(rootDir, settings, parent)
 {
 	m_settings->registerSetting("IntendedVersion", "");
 	m_version.reset(new MinecraftProfile(this, this));
@@ -56,9 +56,9 @@ QList<BasePage *> OneSixInstance::getPages()
 	values.append(new ResourcePackPage(this));
 	values.append(new TexturePackPage(this));
 	values.append(new NotesPage(this));
-	values.append(new ScreenshotsPage(this));
+	values.append(new ScreenshotsPage(PathCombine(minecraftRoot(), "screenshots")));
 	values.append(new InstanceSettingsPage(this));
-	values.append(new OtherLogsPage(this));
+	values.append(new OtherLogsPage(minecraftRoot()));
 	return values;
 }
 
@@ -146,9 +146,9 @@ QStringList OneSixInstance::processMinecraftArgs(AuthSessionPtr session)
 	return parts;
 }
 
-bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScript)
+BaseProcess *OneSixInstance::prepareForLaunch(AuthSessionPtr session)
 {
-
+	QString launchScript;
 	QIcon icon = MMC->icons()->getIcon(iconKey());
 	auto pixmap = icon.pixmap(128, 128);
 	pixmap.save(PathCombine(minecraftRoot(), "icon.png"), "PNG");
@@ -225,7 +225,12 @@ bool OneSixInstance::prepareForLaunch(AuthSessionPtr session, QString &launchScr
 		launchScript += "traits " + trait + "\n";
 	}
 	launchScript += "launcher onesix\n";
-	return true;
+
+	auto process = MinecraftProcess::create(std::dynamic_pointer_cast<MinecraftInstance>(getSharedPtr()));
+	process->setLaunchScript(launchScript);
+	process->setWorkdir(minecraftRoot());
+	process->setLogin(session);
+	return process;
 }
 
 void OneSixInstance::cleanupAfterRun()

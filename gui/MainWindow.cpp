@@ -95,7 +95,7 @@
 #include "logic/BaseInstance.h"
 #include "logic/OneSixInstance.h"
 #include "logic/InstanceFactory.h"
-#include "logic/MinecraftProcess.h"
+#include "logic/BaseProcess.h"
 #include "logic/OneSixUpdate.h"
 #include "logic/java/JavaUtils.h"
 #include "logic/NagUtils.h"
@@ -1342,19 +1342,15 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 
 	QString launchScript;
 
-	if (!instance->prepareForLaunch(session, launchScript))
+	BaseProcess *proc = instance->prepareForLaunch(session);
+	if (!proc)
 		return;
-
-	MinecraftProcess *proc = new MinecraftProcess(instance);
-	proc->setLaunchScript(launchScript);
-	proc->setWorkdir(instance->minecraftRoot());
 
 	this->hide();
 
 	console = new ConsoleWindow(proc);
 	connect(console, SIGNAL(isClosing()), this, SLOT(instanceEnded()));
 
-	proc->setLogin(session);
 	proc->arm();
 
 	if (profiler)
@@ -1381,7 +1377,7 @@ void MainWindow::launchInstance(InstancePtr instance, AuthSessionPtr session,
 				{
 			dialog.accept();
 			QMessageBox msg;
-			msg.setText(tr("The launch of Minecraft itself is delayed until you press the "
+			msg.setText(tr("The game launch is delayed until you press the "
 						   "button. This is the right time to setup the profiler, as the "
 						   "profiler server is running now.\n\n%1").arg(message));
 			msg.setWindowTitle(tr("Waiting"));

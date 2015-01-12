@@ -114,17 +114,6 @@ QString BaseInstance::instanceRoot() const
 	return m_rootDir;
 }
 
-QString BaseInstance::minecraftRoot() const
-{
-	QFileInfo mcDir(PathCombine(instanceRoot(), "minecraft"));
-	QFileInfo dotMCDir(PathCombine(instanceRoot(), ".minecraft"));
-
-	if (dotMCDir.exists() && !mcDir.exists())
-		return dotMCDir.filePath();
-	else
-		return mcDir.filePath();
-}
-
 InstancePtr BaseInstance::getSharedPtr()
 {
 	return shared_from_this();
