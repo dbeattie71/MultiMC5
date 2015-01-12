@@ -80,7 +80,7 @@ std::shared_ptr<SolderPackInfo> loadSolderPackInfo(QJsonObject object)
 			packInfo->builds.append(v);
 		}
 		std::sort(packInfo->builds.begin(), packInfo->builds.end(),
-				  [](SolderVersionPtr &left, SolderVersionPtr &right)
+				  [](const SolderVersionPtr &left, const SolderVersionPtr &right)
 				  { return (*left) > (*right); });
 		int index = 0;
 		for(auto build: packInfo->builds)
