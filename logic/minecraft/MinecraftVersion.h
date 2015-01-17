@@ -38,8 +38,8 @@ public: /* methods */
 	virtual bool hasJarMods() override;
 	virtual bool isMinecraftVersion() override;
 	virtual void applyTo(MinecraftProfile *version) override;
-	virtual int getOrder();
-	virtual void setOrder(int order);
+	virtual int getOrder() override;
+	virtual void setOrder(int order) override;
 	virtual QList<JarmodPtr> getJarMods() override;
 	virtual QString getPatchID() override;
 	virtual QString getPatchVersion() override;
@@ -47,7 +47,7 @@ public: /* methods */
 	virtual QString getPatchFilename() override;
 	bool needsUpdate();
 	bool hasUpdate();
-	virtual bool isCustom();
+	virtual bool isCustom() override;
 
 private: /* methods */
 	void applyFileTo(MinecraftProfile *version);

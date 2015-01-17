@@ -25,6 +25,7 @@
 #include "logic/minecraft/MinecraftProfile.h"
 #include "minecraft/VersionBuildError.h"
 #include "logic/minecraft/MinecraftProcess.h"
+#include "minecraft/OneSixProfileStrategy.h"
 
 #include "logic/assets/AssetsUtils.h"
 #include "logic/icons/IconList.h"
@@ -42,7 +43,7 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	: MinecraftInstance(rootDir, settings, parent)
 {
 	m_settings->registerSetting("IntendedVersion", "");
-	m_version.reset(new MinecraftProfile(this, this));
+	m_version.reset(new MinecraftProfile(new OneSixProfileStrategy(this)));
 }
 
 QList<BasePage *> OneSixInstance::getPages()

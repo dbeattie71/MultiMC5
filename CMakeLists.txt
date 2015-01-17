@@ -505,6 +505,8 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/MinecraftVersionList.h
 	logic/minecraft/OneSixLibrary.cpp
 	logic/minecraft/OneSixLibrary.h
+	logic/minecraft/OneSixProfileStrategy.cpp
+	logic/minecraft/OneSixProfileStrategy.h
 	logic/minecraft/OneSixRule.cpp
 	logic/minecraft/OneSixRule.h
 	logic/minecraft/OpSys.cpp
@@ -513,6 +515,7 @@ SET(MULTIMC_SOURCES
 	logic/minecraft/ParseUtils.h
 	logic/minecraft/ProfileUtils.cpp
 	logic/minecraft/ProfileUtils.h
+	logic/minecraft/ProfileStrategy.h
 	logic/minecraft/RawLibrary.cpp
 	logic/minecraft/RawLibrary.h
 	logic/minecraft/VersionBuilder.cpp

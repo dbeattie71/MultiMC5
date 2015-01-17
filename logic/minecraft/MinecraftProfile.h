@@ -25,13 +25,22 @@
 #include "VersionFile.h"
 #include "JarMod.h"
 
+class ProfileStrategy;
 class OneSixInstance;
 
 class MinecraftProfile : public QAbstractListModel
 {
 	Q_OBJECT
+	friend class ProfileStrategy;
+
 public:
-	explicit MinecraftProfile(OneSixInstance *instance, QObject *parent = 0);
+	explicit MinecraftProfile(ProfileStrategy *strategy);
+
+	/// construct a MinecraftProfile from a single file
+	static std::shared_ptr<MinecraftProfile> fromJson(const QJsonObject &obj);
+
+	void setStrategy(ProfileStrategy * strategy);
+	ProfileStrategy *strategy();
 
 	virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const;
@@ -39,46 +48,72 @@ public:
 	virtual int columnCount(const QModelIndex &parent) const;
 	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
 
-	void reload();
-	void clear();
-
-	bool canRemove(const int index) const;
-
-	QString versionFileId(const int index) const;
-
-	// is this version unmodded vanilla minecraft?
+	/// is this version unchanged by the user?
 	bool isVanilla();
-	// remove any customizations on top of vanilla
+
+	/// remove any customizations on top of whatever 'vanilla' means
 	bool revertToVanilla();
 
-	// does this version have any jar mods?
+	/// install more jar mods
 	void installJarMods(QStringList selectedFiles);
-	void installJarModByFilename(QString filepath);
+
+	/// DEPRECATED, remove ASAP
+	int getFreeOrderNumber();
+
+	/// Can patch file # be removed?
+	bool canRemove(const int index) const;
 
 	enum MoveDirection { MoveUp, MoveDown };
+	/// move patch file # up or down the list
 	void move(const int index, const MoveDirection direction);
-	void resetOrder();
 
-	// clears and reapplies all version files
-	void reapply();
-	void finalize();
-
-public
-slots:
+	/// remove patch file # - including files/records
 	bool remove(const int index);
+
+	/// remove patch file by id - including files/records
 	bool remove(const QString id);
 
+	void resetOrder();
+
+	/// reload all profile patches from storage, clear the profile and apply the patches
+	void reload();
+
+	/// clear the profile
+	void clear();
+
+	/// apply the patches
+	void reapply();
+
+	/// do a finalization step (should always be done after applying all patches to profile)
+	void finalize();
+
 public:
+	/// get all java libraries that belong to the classpath
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNormalLibs();
+
+	/// get all native libraries that need to be available to the process
 	QList<std::shared_ptr<OneSixLibrary>> getActiveNativeLibs();
 
-	static std::shared_ptr<MinecraftProfile> fromJson(const QJsonObject &obj);
+	/// get file ID of the patch file at #
+	QString versionFileId(const int index) const;
 
-private:
-	bool preremove(ProfilePatchPtr patch);
+	/// get the profile patch by id
+	ProfilePatchPtr versionPatch(const QString &id);
 
-	// data members
-public:
+	/// get the profile patch by index
+	ProfilePatchPtr versionPatch(int index);
+
+	/// save the current patch order
+	void saveCurrentOrder() const;
+
+public: /* only use in ProfileStrategy */
+	/// Remove all the patches
+	void clearPatches();
+
+	/// Add the patch object to the internal list of patches
+	void appendPatch(ProfilePatchPtr patch);
+
+public: /* data */
 	/// the ID - determines which jar to use! ACTUALLY IMPORTANT!
 	QString id;
 
@@ -160,13 +195,7 @@ public:
 	}
 	*/
 	// QList<Rule> rules;
-
-	QList<ProfilePatchPtr> VersionPatches;
-	ProfilePatchPtr versionPatch(const QString &id);
-	ProfilePatchPtr versionPatch(int index);
-
 private:
-	OneSixInstance *m_instance;
-	void saveCurrentOrder() const;
-	int getFreeOrderNumber();
+	QList<ProfilePatchPtr> VersionPatches;
+	ProfileStrategy *m_strategy = nullptr;
 };

@@ -39,7 +39,6 @@ public:
 	std::shared_ptr<ModList> resourcePackList() const override;
 	std::shared_ptr<ModList> texturePackList() const override;
 	virtual QList<Mod> getJarMods() const override;
-	// virtual QList<ProfilePatchPtr> getProfilePatches() const;
 
 	virtual QSet<QString> traits();
 

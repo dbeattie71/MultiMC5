@@ -15,25 +15,45 @@
 
 #include <QFile>
 #include <QDir>
-#include <QUuid>
 #include <QJsonDocument>
 #include <QJsonArray>
 #include <pathutils.h>
 
 #include "logic/minecraft/MinecraftProfile.h"
 #include "logic/minecraft/VersionBuilder.h"
+#include "ProfileUtils.h"
+#include "ProfileStrategy.h"
 #include "logic/OneSixInstance.h"
 
-MinecraftProfile::MinecraftProfile(OneSixInstance *instance, QObject *parent)
-	: QAbstractListModel(parent), m_instance(instance)
+MinecraftProfile::MinecraftProfile(ProfileStrategy *strategy)
+	: QAbstractListModel()
 {
+	setStrategy(strategy);
 	clear();
+}
+
+void MinecraftProfile::setStrategy(ProfileStrategy* strategy)
+{
+	Q_ASSERT(strategy != nullptr);
+
+	if(m_strategy != nullptr)
+	{
+		delete m_strategy;
+		m_strategy = nullptr;
+	}
+	m_strategy = strategy;
+	m_strategy->profile = this;
+}
+
+ProfileStrategy* MinecraftProfile::strategy()
+{
+	return m_strategy;
 }
 
 void MinecraftProfile::reload()
 {
 	beginResetModel();
-	VersionBuilder::build(this, m_instance);
+	m_strategy->load();
 	reapply();
 	endResetModel();
 }
@@ -58,35 +78,36 @@ void MinecraftProfile::clear()
 	traits.clear();
 }
 
+void MinecraftProfile::clearPatches()
+{
+	beginResetModel();
+	VersionPatches.clear();
+	endResetModel();
+}
+
+void MinecraftProfile::appendPatch(ProfilePatchPtr patch)
+{
+	int index = VersionPatches.size();
+	beginInsertRows(QModelIndex(), index, index);
+	VersionPatches.append(patch);
+	endInsertRows();
+}
+
 bool MinecraftProfile::canRemove(const int index) const
 {
 	return VersionPatches.at(index)->isMoveable();
-}
-
-bool MinecraftProfile::preremove(ProfilePatchPtr patch)
-{
-	bool ok = true;
-	for(auto & jarmod: patch->getJarMods())
-	{
-		QString fullpath =PathCombine(m_instance->jarModsDir(), jarmod->name);
-		QFileInfo finfo (fullpath);
-		if(finfo.exists())
-			ok &= QFile::remove(fullpath);
-	}
-	return ok;
 }
 
 bool MinecraftProfile::remove(const int index)
 {
 	if (!canRemove(index))
 		return false;
-	if(!preremove(VersionPatches[index]))
+
+	if(!m_strategy->removePatch(VersionPatches.at(index)))
 	{
 		return false;
 	}
-	auto toDelete = VersionPatches.at(index)->getPatchFilename();
-	if(!QFile::remove(toDelete))
-		return false;
+
 	beginRemoveRows(QModelIndex(), index, index);
 	VersionPatches.removeAt(index);
 	endRemoveRows();
@@ -149,6 +170,7 @@ bool MinecraftProfile::isVanilla()
 
 bool MinecraftProfile::revertToVanilla()
 {
+	/*
 	beginResetModel();
 	// remove patches, if present
 	auto it = VersionPatches.begin();
@@ -177,6 +199,8 @@ bool MinecraftProfile::revertToVanilla()
 	endResetModel();
 	saveCurrentOrder();
 	return true;
+	*/
+	return false;
 }
 
 QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()
@@ -199,6 +223,7 @@ QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNormalLibs()
 	}
 	return output;
 }
+
 QList<std::shared_ptr<OneSixLibrary> > MinecraftProfile::getActiveNativeLibs()
 {
 	QList<std::shared_ptr<OneSixLibrary> > output;
@@ -289,14 +314,14 @@ int MinecraftProfile::columnCount(const QModelIndex &parent) const
 
 void MinecraftProfile::saveCurrentOrder() const
 {
-	PatchOrder order;
+	ProfileUtils::PatchOrder order;
 	for(auto item: VersionPatches)
 	{
 		if(!item->isMoveable())
 			continue;
 		order.append(item->getPatchID());
 	}
-	VersionBuilder::writeOverrideOrders(m_instance, order);
+	m_strategy->saveOrder(order);
 }
 
 void MinecraftProfile::move(const int index, const MoveDirection direction)
@@ -336,7 +361,7 @@ void MinecraftProfile::move(const int index, const MoveDirection direction)
 }
 void MinecraftProfile::resetOrder()
 {
-	QDir(m_instance->instanceRoot()).remove("order.json");
+	m_strategy->resetOrder();
 	reload();
 }
 
@@ -389,75 +414,12 @@ void MinecraftProfile::finalize()
 
 void MinecraftProfile::installJarMods(QStringList selectedFiles)
 {
-	for(auto filename: selectedFiles)
-	{
-		installJarModByFilename(filename);
-	}
+	m_strategy->installJarMods(selectedFiles);
 }
 
-void MinecraftProfile::installJarModByFilename(QString filepath)
-{
-	QString patchDir = PathCombine(m_instance->instanceRoot(), "patches");
-	if(!ensureFolderPathExists(patchDir))
-	{
-		// THROW...
-		return;
-	}
-
-	if (!ensureFolderPathExists(m_instance->jarModsDir()))
-	{
-		// THROW...
-		return;
-	}
-
-	QFileInfo sourceInfo(filepath);
-	auto uuid = QUuid::createUuid();
-	QString id = uuid.toString().remove('{').remove('}');
-	QString target_filename = id + ".jar";
-	QString target_id = "org.multimc.jarmod." + id;
-	QString target_name = sourceInfo.completeBaseName() + " (jar mod)";
-	QString finalPath = PathCombine(m_instance->jarModsDir(), target_filename);
-
-	QFileInfo targetInfo(finalPath);
-	if(targetInfo.exists())
-	{
-		// THROW
-		return;
-	}
-
-	if (!QFile::copy(sourceInfo.absoluteFilePath(),QFileInfo(finalPath).absoluteFilePath()))
-	{
-		// THROW
-		return;
-	}
-
-	auto f = std::make_shared<VersionFile>();
-	auto jarMod = std::make_shared<Jarmod>();
-	jarMod->name = target_filename;
-	f->jarMods.append(jarMod);
-	f->name = target_name;
-	f->fileId = target_id;
-	f->order = getFreeOrderNumber();
-	QString patchFileName = PathCombine(patchDir, target_id + ".json");
-	f->filename = patchFileName;
-
-	QFile file(patchFileName);
-	if (!file.open(QFile::WriteOnly))
-	{
-		QLOG_ERROR() << "Error opening" << file.fileName()
-					 << "for reading:" << file.errorString();
-		return;
-		// THROW
-	}
-	file.write(f->toJson(true).toJson());
-	file.close();
-	int index = VersionPatches.size();
-	beginInsertRows(QModelIndex(), index, index);
-	VersionPatches.append(f);
-	endInsertRows();
-	saveCurrentOrder();
-}
-
+/*
+ * TODO: get rid of this. Get rid of all order numbers.
+ */
 int MinecraftProfile::getFreeOrderNumber()
 {
 	int largest = 100;

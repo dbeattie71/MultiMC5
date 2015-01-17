@@ -24,19 +24,12 @@ class OneSixInstance;
 class QJsonObject;
 class QFileInfo;
 
-typedef QStringList PatchOrder;
-
 class VersionBuilder
 {
 	VersionBuilder();
 public:
 	static void build(MinecraftProfile *version, OneSixInstance *instance);
 	static void readJsonAndApplyToVersion(MinecraftProfile *version, const QJsonObject &obj);
-	static VersionFilePtr parseJsonFile(const QFileInfo &fileInfo, const bool requireOrder, bool isFTB = false);
-	static VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo);
-
-	bool readOverrideOrders(OneSixInstance *instance, PatchOrder &order);
-	static bool writeOverrideOrders(OneSixInstance *instance, const PatchOrder &order);
 
 private:
 	MinecraftProfile *m_version;

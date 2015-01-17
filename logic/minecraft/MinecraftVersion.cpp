@@ -2,6 +2,7 @@
 #include "MinecraftProfile.h"
 #include "VersionBuildError.h"
 #include "VersionBuilder.h"
+#include "ProfileUtils.h"
 #include "MultiMC.h"
 #include "logic/settings/SettingsObject.h"
 
@@ -60,7 +61,7 @@ void MinecraftVersion::applyFileTo(MinecraftProfile *version)
 {
 	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_descriptor));
 
-	auto versionObj = VersionBuilder::parseBinaryJsonFile(versionFile);
+	auto versionObj = ProfileUtils::parseBinaryJsonFile(versionFile);
 	versionObj->applyTo(version);
 }
 
