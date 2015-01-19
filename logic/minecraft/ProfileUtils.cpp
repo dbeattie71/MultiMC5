@@ -127,24 +127,19 @@ VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo)
 
 void removeLwjglFromPatch(VersionFilePtr patch)
 {
-	QList<RawLibraryPtr> filteredLibs;
-
-	for (auto lib : patch->overwriteLibs)
+	auto filter = [](QList<RawLibraryPtr>& libs)
 	{
-		if (!g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
+		QList<RawLibraryPtr> filteredLibs;
+		for (auto lib : libs)
 		{
-			filteredLibs.append(lib);
+			if (!g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
+			{
+				filteredLibs.append(lib);
+			}
 		}
-	}
-	patch->overwriteLibs = filteredLibs;
-
-	for (auto lib : patch->addLibs)
-	{
-		if (!g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
-		{
-			filteredLibs.append(lib);
-		}
-	}
-	patch->addLibs = filteredLibs;
+		libs = filteredLibs;
+	};
+	filter(patch->addLibs);
+	filter(patch->overwriteLibs);
 }
 }
