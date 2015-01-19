@@ -29,6 +29,8 @@ public:
 	explicit LegacyInstance(const QString &rootDir, SettingsObject *settings,
 							QObject *parent = 0);
 
+	virtual void init() {};
+
 	/// Path to the instance's minecraft.jar
 	QString runnableJar() const;
 

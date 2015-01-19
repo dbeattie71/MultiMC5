@@ -29,6 +29,8 @@ public:
 						  QObject *parent = 0);
 	virtual ~OneSixInstance(){};
 
+	virtual void init();
+
 	////// Edit Instance Dialog stuff //////
 	virtual QList<BasePage *> getPages();
 	virtual QString dialogTitle();
@@ -39,6 +41,7 @@ public:
 	std::shared_ptr<ModList> resourcePackList() const override;
 	std::shared_ptr<ModList> texturePackList() const override;
 	virtual QList<Mod> getJarMods() const override;
+	virtual void createProfile();
 
 	virtual QSet<QString> traits();
 

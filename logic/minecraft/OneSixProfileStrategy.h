@@ -14,6 +14,10 @@ public:
 	virtual bool installJarMods(QStringList filepaths) override;
 	virtual bool removePatch(ProfilePatchPtr patch) override;
 
-private:
+protected:
+	void loadDefaultBuiltinPatches();
+	void loadUserPatches();
+
+protected:
 	OneSixInstance *m_instance;
 };

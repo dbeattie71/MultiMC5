@@ -43,8 +43,18 @@ OneSixInstance::OneSixInstance(const QString &rootDir, SettingsObject *settings,
 	: MinecraftInstance(rootDir, settings, parent)
 {
 	m_settings->registerSetting("IntendedVersion", "");
+}
+
+void OneSixInstance::init()
+{
+	createProfile();
+}
+
+void OneSixInstance::createProfile()
+{
 	m_version.reset(new MinecraftProfile(new OneSixProfileStrategy(this)));
 }
+
 
 QList<BasePage *> OneSixInstance::getPages()
 {

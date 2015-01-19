@@ -49,6 +49,8 @@ public: /* methods */
 	bool hasUpdate();
 	virtual bool isCustom() override;
 
+	VersionFilePtr getVersionFile();
+
 private: /* methods */
 	void applyFileTo(MinecraftProfile *version);
 

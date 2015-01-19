@@ -16,10 +16,8 @@ OneSixProfileStrategy::OneSixProfileStrategy(OneSixInstance* instance)
 	m_instance = instance;
 }
 
-void OneSixProfileStrategy::load()
+void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 {
-	profile->clearPatches();
-
 	// Minecraft - just the builtin stuff for now
 	auto minecraftList = MMC->minecraftlist();
 	auto mcversion = minecraftList->findVersion(m_instance->intendedVersionId());
@@ -42,7 +40,10 @@ void OneSixProfileStrategy::load()
 	lwjglPatch->setOrder(-1);
 	lwjgl->setVanilla(true);
 	profile->appendPatch(lwjglPatch);
+}
 
+void OneSixProfileStrategy::loadUserPatches()
+{
 	// load all patches, put into map for ordering, apply in the right order
 	ProfileUtils::PatchOrder userOrder;
 	ProfileUtils::readOverrideOrders(PathCombine(m_instance->instanceRoot(), "order.json"), userOrder);
@@ -102,6 +103,15 @@ void OneSixProfileStrategy::load()
 		auto &filePair = files[order];
 		profile->appendPatch(filePair.second);
 	}
+}
+
+
+void OneSixProfileStrategy::load()
+{
+	profile->clearPatches();
+
+	loadDefaultBuiltinPatches();
+	loadUserPatches();
 
 	profile->finalize();
 }

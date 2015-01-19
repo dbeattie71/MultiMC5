@@ -77,6 +77,7 @@ InstanceFactory::InstLoadError InstanceFactory::loadInstance(InstancePtr &inst,
 	{
 		return InstanceFactory::UnknownLoadError;
 	}
+	inst->init();
 	return NoLoadError;
 }
 
@@ -108,6 +109,7 @@ InstanceFactory::createInstance(InstancePtr &inst, BaseVersionPtr version, const
 		m_settings->set("InstanceType", "OneSix");
 		inst.reset(new OneSixInstance(instDir, m_settings));
 		inst->setIntendedVersionId(version->descriptor());
+		inst->init();
 		return InstanceFactory::NoCreateError;
 	}
 	auto ftbVersion = std::dynamic_pointer_cast<FTBVersion>(version);
@@ -125,6 +127,7 @@ InstanceFactory::createInstance(InstancePtr &inst, BaseVersionPtr version, const
 			m_settings->set("InstanceType", "OneSixFTB");
 			inst.reset(new OneSixFTBInstance(instDir, m_settings));
 			inst->setIntendedVersionId(mcversion->descriptor());
+			inst->init();
 		}
 		return InstanceFactory::NoCreateError;
 	}
@@ -136,6 +139,7 @@ InstanceFactory::createInstance(InstancePtr &inst, BaseVersionPtr version, const
 
 		solderPack->setSolderVersion(solderVersion);
 		inst.reset(solderPack);
+		inst->init();
 		return InstanceFactory::NoCreateError;
 	}
 	delete m_settings;

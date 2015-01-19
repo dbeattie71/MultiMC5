@@ -12,6 +12,7 @@ public:
 							QObject *parent = 0);
     virtual ~SolderInstance(){};
 
+	virtual void createProfile() override;
 	void setSolderVersion(SolderVersionPtr url);
 	SolderVersionPtr solderVersion();
 	virtual QList<Mod> getJarMods() const override;

@@ -59,6 +59,8 @@ public:
 
 	virtual void copy(const QDir &newDir) {}
 
+	virtual void init() = 0;
+
 	/// nuke thoroughly - deletes the instance contents, notifies the list/model which is
 	/// responsible of cleaning up the husk
 	void nuke();

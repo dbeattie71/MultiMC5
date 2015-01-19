@@ -45,7 +45,6 @@ private:
 	std::shared_ptr<ForgeVersion> m_forge_version;
 	QString internalPath;
 	QString finalPath;
-	QString realVersionId;
 	QString m_forgeVersionString;
 	QString m_universal_url;
 };

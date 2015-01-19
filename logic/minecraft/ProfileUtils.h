@@ -21,4 +21,5 @@ VersionFilePtr parseBinaryJsonFile(const QFileInfo &fileInfo);
 
 /// Remove LWJGL from a patch file. This is applied to all Mojang-like profile files.
 void removeLwjglFromPatch(VersionFilePtr patch);
+
 }

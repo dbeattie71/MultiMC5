@@ -644,6 +644,10 @@ SET(MULTIMC_SOURCES
 	logic/technic/SolderVersion.h
 	logic/technic/SolderInstance.cpp
 	logic/technic/SolderInstance.h
+	logic/technic/SolderUpdate.cpp
+	logic/technic/SolderUpdate.h
+	logic/technic/SolderProfileStrategy.cpp
+	logic/technic/SolderProfileStrategy.h
 	gui/dialogs/TechnicDialog.cpp
 	gui/dialogs/TechnicDialog.h
 )

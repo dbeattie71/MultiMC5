@@ -59,11 +59,16 @@ bool MinecraftVersion::isMinecraftVersion()
 // 2. if discrepancies are found, fall out and fail (impossible to apply incomplete version).
 void MinecraftVersion::applyFileTo(MinecraftProfile *version)
 {
+	getVersionFile()->applyTo(version);
+}
+
+VersionFilePtr MinecraftVersion::getVersionFile()
+{
 	QFileInfo versionFile(QString("versions/%1/%1.dat").arg(m_descriptor));
 
-	auto versionObj = ProfileUtils::parseBinaryJsonFile(versionFile);
-	versionObj->applyTo(version);
+	return ProfileUtils::parseBinaryJsonFile(versionFile);
 }
+
 
 void MinecraftVersion::applyTo(MinecraftProfile *version)
 {

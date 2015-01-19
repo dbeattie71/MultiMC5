@@ -5,6 +5,7 @@
 
 #include <QJsonDocument>
 #include <QJsonArray>
+#include <QRegularExpression>
 
 namespace ProfileUtils
 {
@@ -136,6 +137,14 @@ void removeLwjglFromPatch(VersionFilePtr patch)
 		}
 	}
 	patch->overwriteLibs = filteredLibs;
-}
 
+	for (auto lib : patch->addLibs)
+	{
+		if (!g_VersionFilterData.lwjglWhitelist.contains(lib->artifactPrefix()))
+		{
+			filteredLibs.append(lib);
+		}
+	}
+	patch->addLibs = filteredLibs;
+}
 }

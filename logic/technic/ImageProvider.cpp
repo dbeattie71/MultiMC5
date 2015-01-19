@@ -43,33 +43,35 @@ QPixmap ImageProvider::requestPixmap(const QString& id, QSize* size, const QSize
 
 	// assume the images can change
 	auto metaentry = MMC->metacache()->resolveEntry("cache", QLatin1Literal("technic/") + key);
-	metaentry->stale = true;
-	auto download = CacheDownload::make(QUrl(url), metaentry);
 
-	// terrible workaround for lack of synchronous downloads... FIXME: replace.
+	if(metaentry->stale)
 	{
-		bool failed = true;
-		QEventLoop loop;
-		auto goodCatcher = [&failed, &loop]()
+		auto download = CacheDownload::make(QUrl(url), metaentry);
+
+		// terrible workaround for lack of synchronous downloads... FIXME: replace.
 		{
-			loop.exit(1);
-		};
-		auto badCatcher = [&failed, &loop]()
-		{
-			loop.exit(0);
-		};
-		connect(download.get(), &NetAction::succeeded, goodCatcher);
-		connect(download.get(), &NetAction::failed, badCatcher);
-		download->start();
-		if(!loop.exec())
-		{
-			QLOG_ERROR() << "Download failed for " << url;
-			return QPixmap();
+			bool failed = true;
+			QEventLoop loop;
+			auto goodCatcher = [&failed, &loop]()
+			{
+				loop.exit(1);
+			};
+			auto badCatcher = [&failed, &loop]()
+			{
+				loop.exit(0);
+			};
+			connect(download.get(), &NetAction::succeeded, goodCatcher);
+			connect(download.get(), &NetAction::failed, badCatcher);
+			download->start();
+			if(!loop.exec())
+			{
+				QLOG_ERROR() << "Download failed for " << url;
+				return QPixmap();
+			}
 		}
 	}
-
 	QPixmap p;
-	if(!p.load(download->getTargetFilepath()))
+	if(!p.load(metaentry->getFullPath()))
 	{
 		QLOG_ERROR() << "Load failed for " << key;
 	}

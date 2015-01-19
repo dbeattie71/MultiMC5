@@ -116,7 +116,7 @@ void ForgeInstaller::prepare(const QString &filename, const QString &universalUr
 	file.close();
 
 	m_forge_json = newVersion;
-	realVersionId = m_forge_json->id = installObj.value("minecraft").toString();
+	m_forge_json->id = installObj.value("minecraft").toString();
 }
 
 bool ForgeInstaller::add(OneSixInstance *to)
