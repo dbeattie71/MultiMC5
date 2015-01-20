@@ -18,16 +18,67 @@ OneSixProfileStrategy::OneSixProfileStrategy(OneSixInstance* instance)
 
 void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 {
-	// Minecraft - just the builtin stuff for now
-	auto minecraftList = MMC->minecraftlist();
-	auto mcversion = minecraftList->findVersion(m_instance->intendedVersionId());
-	auto minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
+	auto versionJsonPath = PathCombine(m_instance->instanceRoot(), "version.json");
+	auto customJsonPath = PathCombine(m_instance->instanceRoot(), "custom.json");
+	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
+
+	// convert old crap.
+	if(QFile::exists(customJsonPath))
+	{
+		if(!ensureFilePathExists(mcJson))
+		{
+			// WHAT DO???
+		}
+		if(!QFile::rename(customJsonPath, mcJson))
+		{
+			// WHAT DO???
+		}
+		if(QFile::exists(versionJsonPath))
+		{
+			if(!QFile::remove(versionJsonPath))
+			{
+				// WHAT DO???
+			}
+		}
+	}
+	else if(QFile::exists(versionJsonPath))
+	{
+		if(!ensureFilePathExists(mcJson))
+		{
+			// WHAT DO???
+		}
+		if(!QFile::rename(versionJsonPath, mcJson))
+		{
+			// WHAT DO???
+		}
+	}
+
+	// load up the base minecraft patch
+	ProfilePatchPtr minecraftPatch;
+	if(QFile::exists(mcJson))
+	{
+		auto file = ProfileUtils::parseJsonFile(QFileInfo(mcJson), false);
+		file->fileId = "net.minecraft";
+		file->name = "Minecraft";
+		if(file->version.isEmpty())
+		{
+			file->version = m_instance->intendedVersionId();
+		}
+		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(file);
+	}
+	else
+	{
+		auto minecraftList = MMC->minecraftlist();
+		auto mcversion = minecraftList->findVersion(m_instance->intendedVersionId());
+		minecraftPatch = std::dynamic_pointer_cast<ProfilePatch>(mcversion);
+	}
 	if (!minecraftPatch)
 	{
 		throw VersionIncomplete("net.minecraft");
 	}
 	minecraftPatch->setOrder(-2);
 	profile->appendPatch(minecraftPatch);
+
 
 	// TODO: this is obviously fake.
 	QResource LWJGL(":/versions/LWJGL/2.9.1.json");

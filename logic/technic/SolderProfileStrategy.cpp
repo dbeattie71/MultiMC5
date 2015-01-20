@@ -119,8 +119,8 @@ VersionFilePtr processForgeJsonForTechnic(VersionFilePtr patch, MinecraftVersion
 	output->fileId = "net.technicpack";
 	output->version = "1.0.0";
 	output->mcVersion = vanillaPatch->mcVersion;
-	QLOG_DEBUG() << output->toJson(false).toJson();
 	ProfileUtils::removeLwjglFromPatch(output);
+	QLOG_DEBUG() << output->toJson(false).toJson();
 	return output;
 }
 
