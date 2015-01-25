@@ -16,7 +16,7 @@ OneSixProfileStrategy::OneSixProfileStrategy(OneSixInstance* instance)
 	m_instance = instance;
 }
 
-void OneSixProfileStrategy::loadDefaultBuiltinPatches()
+void OneSixProfileStrategy::upgradeDeprecatedFiles()
 {
 	auto versionJsonPath = PathCombine(m_instance->instanceRoot(), "version.json");
 	auto customJsonPath = PathCombine(m_instance->instanceRoot(), "custom.json");
@@ -52,7 +52,12 @@ void OneSixProfileStrategy::loadDefaultBuiltinPatches()
 			// WHAT DO???
 		}
 	}
+}
 
+
+void OneSixProfileStrategy::loadDefaultBuiltinPatches()
+{
+	auto mcJson = PathCombine(m_instance->instanceRoot(), "patches" , "net.minecraft.json");
 	// load up the base minecraft patch
 	ProfilePatchPtr minecraftPatch;
 	if(QFile::exists(mcJson))
@@ -161,6 +166,7 @@ void OneSixProfileStrategy::load()
 {
 	profile->clearPatches();
 
+	upgradeDeprecatedFiles();
 	loadDefaultBuiltinPatches();
 	loadUserPatches();
 

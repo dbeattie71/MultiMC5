@@ -294,7 +294,10 @@ std::shared_ptr<ModList> OneSixInstance::texturePackList() const
 bool OneSixInstance::setIntendedVersionId(QString version)
 {
 	settings().set("IntendedVersion", version);
-	clearProfile();
+	if(getMinecraftProfile())
+	{
+		clearProfile();
+	}
 	return true;
 }
 

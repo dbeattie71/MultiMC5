@@ -17,6 +17,7 @@ public:
 protected:
 	void loadDefaultBuiltinPatches();
 	void loadUserPatches();
+	void upgradeDeprecatedFiles();
 
 protected:
 	OneSixInstance *m_instance;
